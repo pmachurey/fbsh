@@ -1,5 +1,10 @@
 #!/usr/bin/env python
-import subprocess, httplib, urllib, json, sys, time
+import subprocess
+import httplib
+import urllib
+import json
+import sys
+import time
 
 # Usage : 4 parameters (login1, token1, login2 ,token2)
 # Goal : Allows to receive and sends commands / results from two facebook accounts 
@@ -9,54 +14,52 @@ access_token1 = sys.argv[2]
 userid2 = sys.argv[3]
 access_token2 = sys.argv[4]
 
-if len(sys.argv) != 4
-		print "not enough arguments !"
-		return
-
-conn = httplib.HTTPSConnection("graph.facebook.com")
-
-#Second accound access
-conn.request("GET", "/" + userid2 + "/feed?access_token=" + access_token2)
-rep = conn.getresponse()
-conn.close()
-json_rep = json.loads(rep.read())
-
-#Stock the last message id
-lastID = json_rep['date'][0]['id']
+if len(sys.argv) != 5:
+	print "not enough arguments !"
+	sys.exit()
 
 while 1:
-	#First accound access
-	conn = httplib.HTTPSConnecion("graph.facebook.com")
-	conn.request("GET", "/" + userid1 + "/feed?access_token=" + access_token1)
+	#Second account access
+	conn = httplib.HTTPSConnection("graph.facebook.com")
+	conn.request("GET", "/" + userid2 + "/feed?access_token=" + access_token2)
 	rep = conn.getresponse()
 	json_rep = json.loads(rep.read())
+
+	#Stock the last message id
+	lastID = json_rep['data'][0]['id']
 	
 	#Prompt
 	sys.stdout.write("12007#")
 	msg_out = sys.stdin.readline()
+	if msg_out == "exit\n":
+		sys.exit()
 	
 	#uploading command
-	params = urllib.urlencode({'access_token' : access_token2,
+	params = urllib.urlencode({'access_token' : access_token1,
 			'message' :msg_out})
 	conn.close()
-	conn = httplib.HTTPSConnecion("graph.facebook.com")
+	conn = httplib.HTTPSConnection("graph.facebook.com")
 	conn.request("POST", "/" + userid1 + "/feed", params)
 	conn.getresponse()
-	conn.close()
 	
 	#displaying responses
 	#Second accound access
+	conn.close()
+	conn = httplib.HTTPSConnection("graph.facebook.com")
 	conn.request("GET", "/" + userid2 + "/feed?access_token=" + access_token2)
 	rep = conn.getresponse()
 	json_rep = json.loads(rep.read())
 	
-	while lastID == json_rep['date'][0]['id'] :
+	while lastID == json_rep['data'][0]['id'] :
 		time.sleep(3)
+		conn.close()
+		conn = httplib.HTTPSConnection("graph.facebook.com")
 		conn.request("GET", "/" + userid2 + "/feed?access_token=" + access_token2)
 		rep = conn.getresponse()
 		json_rep = json.loads(rep.read())
 
-	msg_in = json_rep['date'][0]['message']
-	sys.out.write(msg_in)
+	msg_in = json_rep['data'][0]['message']
+	print msg_in
+	conn.close()
 
 	

